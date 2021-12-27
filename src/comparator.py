@@ -2,6 +2,18 @@ import csv
 from document import *
 from strsimpy.overlap_coefficient import OverlapCoefficient
 
+
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 def load_documents(csv_filename):
     my_documents = []
     with open(csv_filename, newline='') as csvfile:
@@ -75,22 +87,24 @@ def is_same_document(document_a, document_b):
         return False
 
 
-
-def add_citations_to_documents(documents, citing_documents):
+def add_scopus_citations_to_documents(documents, citing_documents):
     for document in documents:
-        document.print_data()
-        document.cited_by = find_documents_citing_this_document(document, citing_documents)
-        print('Num citations indicated by SCOPUS: ', document.num_citations)
-        print('Num citations found in SCOPUS citing documents CSV: ', len(document.cited_by))
-        if int(document.num_citations) is not len(document.cited_by):
-            print('WARNING: the number listed on the documents CSV is not the same as '+\
-                  'the number of citing documents found in the citations CSV. '+\
-                  'This may be due to poor parsing of the citation CSV. '+\
-                  'Results may be inaccurate.')
-        print('----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ')
+        add_scopus_citations_to_document(document, citing_documents)
 
 
-def find_documents_citing_this_document(this_document, citing_documents):
+def add_scopus_citations_to_document(document, citing_documents):
+    print('----> Looking for citations in the SCOPUS citations document...')
+    document.cited_by = find_scopus_documents_citing_this_document(document, citing_documents)
+    print('Num citations indicated by SCOPUS: ', document.num_citations)
+    print('Num citations found in SCOPUS citing documents CSV: ', len(document.cited_by))
+    if int(document.num_citations) is not len(document.cited_by):
+        print(f"{bcolors.WARNING}----> WARNING: the number listed on the documents CSV is not the same as \
+the number of citing documents found in the citations CSV. \
+This may be due to poor parsing of the citation CSV. \
+Results likely to be inaccurate.{bcolors.ENDC}")
+
+
+def find_scopus_documents_citing_this_document(this_document, citing_documents):
     documents_citing_this_document = []
 
     for citing_document in citing_documents:
@@ -100,6 +114,11 @@ def find_documents_citing_this_document(this_document, citing_documents):
     return documents_citing_this_document
 
 
+def find_scopus_document(document, my_scopus_documents):
+    for scopus_document in my_scopus_documents:
+        if is_same_document(document, scopus_document):
+            return scopus_document
+    return None
 
 
 ##### ##### ##### ##### ##### ##### ##### MAIN
@@ -108,4 +127,64 @@ def find_documents_citing_this_document(this_document, citing_documents):
 my_scopus_documents = load_documents('data/documents.csv')
 scopus_citing_documents = load_documents('data/citedby.csv')
 
-add_citations_to_documents(my_scopus_documents, scopus_citing_documents)
+# add_scopus_citations_to_documents(my_scopus_documents, scopus_citing_documents)
+
+
+
+from scholarly import scholarly
+from scholarly import ProxyGenerator
+
+# Set up a ProxyGenerator object to use free proxies
+# This needs to be done only once per session
+pg = ProxyGenerator()
+pg.FreeProxies()
+scholarly.use_proxy(pg)
+
+
+# Retrieve the author's data, fill-in, and print
+# Get an iterator for the author results
+search_query = scholarly.search_author('Enzo De Sena')
+# Retrieve the first result from the iterator
+first_author_result = next(search_query)
+scholarly.pprint(first_author_result)
+
+
+
+# Retrieve all the details for the author
+author = scholarly.fill(first_author_result)
+# scholarly.pprint(author)
+
+my_scholar_documents = []
+
+for scholar_entry in author['publications']:
+    # scholarly.pprint(scholarly.fill(scholar_entry))
+    scholar_entry_filled = scholarly.fill(scholar_entry)
+    document = construct_document_from_scholar_entry(scholar_entry_filled)
+    my_scholar_documents.append(document)
+
+    print()
+    print('----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ')
+    print()
+    print('----> Handling the following Google Scholar document:')
+    document.print_data()
+
+    print('----> Attempting to find corresponding SCOPUS entry...')
+    scopus_document = find_scopus_document(document, my_scopus_documents)
+    if scopus_document is not None:
+        print('----> Entry found! See below the SCOPUS entry details:')
+        scopus_document.print_data()
+        add_scopus_citations_to_document(scopus_document, scopus_citing_documents)
+
+
+    else:
+        print(f"{bcolors.FAIL}----> A SCOPUS entry could not be found.{bcolors.ENDC}")
+
+
+
+# # Print the titles of the author's publications
+# publication_titles = [pub['bib']['title'] for pub in author['publications']]
+# print(publication_titles)
+
+# Which papers cited that publication?
+# citations = [citation['bib']['title'] for citation in scholarly.citedby(first_publication_filled)]
+# print(citations)
