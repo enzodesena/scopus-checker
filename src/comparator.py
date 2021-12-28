@@ -1,7 +1,7 @@
 import csv
 from document import *
 from strsimpy.overlap_coefficient import OverlapCoefficient
-
+import os
 
 class bcolors:
     HEADER = '\033[95m'
@@ -92,18 +92,6 @@ def add_scopus_citations_to_documents(documents, citing_documents):
         add_scopus_citations_to_document(document, citing_documents)
 
 
-def add_scopus_citations_to_document(document, citing_documents):
-    print('----> Looking for citations in the SCOPUS citations document...')
-    document.cited_by = find_scopus_documents_citing_this_document(document, citing_documents)
-    print('Num citations indicated by SCOPUS: ', document.num_citations)
-    print('Num citations found in SCOPUS citing documents CSV: ', len(document.cited_by))
-    if int(document.num_citations) is not len(document.cited_by):
-        print(f"{bcolors.WARNING}----> WARNING: the number listed on the documents CSV is not the same as \
-the number of citing documents found in the citations CSV. \
-This may be due to poor parsing of the citation CSV. \
-Results likely to be inaccurate.{bcolors.ENDC}")
-
-
 def find_scopus_documents_citing_this_document(this_document, citing_documents):
     documents_citing_this_document = []
 
@@ -114,7 +102,7 @@ def find_scopus_documents_citing_this_document(this_document, citing_documents):
     return documents_citing_this_document
 
 
-def find_scopus_document(document, my_scopus_documents):
+def find_document_in_documents(document, my_scopus_documents):
     for scopus_document in my_scopus_documents:
         if is_same_document(document, scopus_document):
             return scopus_document
@@ -123,35 +111,82 @@ def find_scopus_document(document, my_scopus_documents):
 
 ##### ##### ##### ##### ##### ##### ##### MAIN
 
+scopus_documents_filename = 'data/documents.csv'
+scopus_citing_documents_filename = 'data/citedby.csv'
+use_proxy = 'free' # 'free' or 'no'
+author_name = 'Enzo De Sena' #
 
-my_scopus_documents = load_documents('data/documents.csv')
-scopus_citing_documents = load_documents('data/citedby.csv')
 
-# add_scopus_citations_to_documents(my_scopus_documents, scopus_citing_documents)
-
+my_scopus_documents = load_documents(scopus_documents_filename)
+scopus_citing_documents = load_documents(scopus_citing_documents_filename)
 
 
 from scholarly import scholarly
 from scholarly import ProxyGenerator
 
-# Set up a ProxyGenerator object to use free proxies
-# This needs to be done only once per session
-pg = ProxyGenerator()
-pg.FreeProxies()
-scholarly.use_proxy(pg)
+if use_proxy != 'no':
+    pg = ProxyGenerator()
+    if use_proxy == 'free':
+        pg.FreeProxies()
+    elif use_proxy == 'luminati':
+        if os.getenv("LUMINATI_USERNAME") is None or os.getenv("LUMINATI_PASSWORD") is None or os.getenv("LUMINATI_PORT") is None:
+            raise SystemExit(f"{bcolors.FAIL}----> You set the proxy as 'luminati', but either LUMINATI_USERNAME, LUMINATI_PASSWORD or LUMINATI_PORT was not set in the .env file.{bcolors.ENDC}")
+            exit()
+        pg.Luminati(usr=os.getenv("LUMINATI_USERNAME"),passwd=os.getenv("LUMINATI_PASSWORD"),proxy_port = os.getenv("LUMINATI_PORT"))
+    else:
+        raise SystemExit(f"{bcolors.FAIL}----> The type of proxy was not recognised; the available options are 'no', 'free' or 'luminati'.{bcolors.ENDC}")
+    scholarly.use_proxy(pg)
 
 
-# Retrieve the author's data, fill-in, and print
-# Get an iterator for the author results
-search_query = scholarly.search_author('Enzo De Sena')
-# Retrieve the first result from the iterator
-first_author_result = next(search_query)
-scholarly.pprint(first_author_result)
+print("----> Searching for author entries on Google Scholar corresponding to the query '"+author_name+"'")
 
+search_query = scholarly.search_author(author_name)
+while True:
+    try:
+        author_entry = next(search_query)
+    except:
+        raise SystemExit(f"{bcolors.FAIL}----> There was no Google Scholar author entry corresponding to your query.{bcolors.ENDC}")
+        break
+
+    author_entry = scholarly.fill(author_entry)
+
+    print('Author name: \t'+author_entry['name'])
+    if 'affiliation' in author_entry.keys():
+        print('Affiliation: \t'+author_entry['affiliation'])
+    if 'citedby' in author_entry.keys():
+        print('Num citations: \t'+str(author_entry['citedby']))
+    if 'hindex' in author_entry.keys():
+        print('H-index: \t'+str(author_entry['hindex']))
+    if 'publications' in author_entry.keys():
+        print('Num documents: \t'+str(len(author_entry['publications'])))
+    if 'coauthors' in author_entry.keys():
+        print('Num coauthors: \t'+str(len(author_entry['coauthors'])))
+
+    print('Is this you? (y/n)')
+    user_answer = input()
+
+    if user_answer.lower() == 'y' or user_answer.lower() == 'yes':
+        print('----> You accepted the entry above')
+        author = author_entry
+        break
+    else:
+        print('----> You refused the entry above')
+
+
+# author_entry = next(search_query)
+# scholarly.pprint(scholarly.fill(author_entry))
+
+# for author_entry in next(search_query):
+#     scholarly.pprint(scholarly.fill(author_entry))
+
+# try:
+#     first_author_result = next(search_query)
+# except :
+#     raise SystemExit(f"{bcolors.FAIL}----> It looks like no google scholar profile was found. {bcolors.ENDC}")
 
 
 # Retrieve all the details for the author
-author = scholarly.fill(first_author_result)
+# author = scholarly.fill(first_author_result)
 # scholarly.pprint(author)
 
 my_scholar_documents = []
@@ -162,29 +197,38 @@ for scholar_entry in author['publications']:
     document = construct_document_from_scholar_entry(scholar_entry_filled)
     my_scholar_documents.append(document)
 
-    print()
-    print('----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ')
-    print()
     print('----> Handling the following Google Scholar document:')
     document.print_data()
 
     print('----> Attempting to find corresponding SCOPUS entry...')
-    scopus_document = find_scopus_document(document, my_scopus_documents)
+    scopus_document = find_document_in_documents(document, my_scopus_documents)
     if scopus_document is not None:
         print('----> Entry found! See below the SCOPUS entry details:')
         scopus_document.print_data()
-        add_scopus_citations_to_document(scopus_document, scopus_citing_documents)
 
+        print('----> Looking for citations in the SCOPUS citations document...')
+        scopus_document.cited_by = find_scopus_documents_citing_this_document(scopus_document, scopus_citing_documents)
+        print('Num citations indicated by SCOPUS: ', scopus_document.num_citations)
+        print('Num citations found in SCOPUS citing documents CSV: ', len(scopus_document.cited_by))
+        if scopus_document.num_citations is not len(scopus_document.cited_by):
+            print(f"{bcolors.WARNING}----> WARNING: the number listed on the documents CSV is not the same as the number of citing documents found in the SCOPUS citations CSV. This may be due to poor parsing of the citation CSV. Results likely to be inaccurate.{bcolors.ENDC}")
 
+        print('----> Downloading Google Scholar citations of the paper... (if this hangs here, it may be due to a slow proxy or too many requests to Google Scholar; wait or connect from a different IP/proxy.)')
+        scholar_citating_documents = scholarly.citedby(scholar_entry_filled)
+        for citation in scholar_citating_documents:
+            scholar_citing_document = construct_document_from_scholar_entry(scholarly.fill(citation))
+            scopus_citing_document = find_document_in_documents(scholar_citing_document, scopus_document.cited_by)
+            if scopus_citing_document is not None:
+                print(f"----> Citation found! See below the Google Scholar entry followed by the SCOPUS entry:")
+                scholar_citing_document.print_data()
+                scopus_citing_document.print_data()
+            else:
+                print(f"{bcolors.FAIL}----> The following citation does not appear to be recorded on SCOPUS:{bcolors.ENDC}")
+                scholar_citing_document.print_data()
     else:
-        print(f"{bcolors.FAIL}----> A SCOPUS entry could not be found.{bcolors.ENDC}")
+        print(f"{bcolors.FAIL}----> It appears no SCOPUS entry is present for the paper above.{bcolors.ENDC}")
+    print()
+    print('----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ')
+    print()
 
-
-
-# # Print the titles of the author's publications
-# publication_titles = [pub['bib']['title'] for pub in author['publications']]
-# print(publication_titles)
-
-# Which papers cited that publication?
-# citations = [citation['bib']['title'] for citation in scholarly.citedby(first_publication_filled)]
-# print(citations)
+print(f"All done.")
