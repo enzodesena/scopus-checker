@@ -7,7 +7,7 @@ from scholarly import ProxyGenerator
 
 scopus_documents_filename = 'data/documents.csv'
 scopus_citing_documents_filename = 'data/citedby.csv'
-use_proxy = 'free' # 'free' or 'no'
+use_proxy = 'scraperapi' # 'free' or 'no'
 author_name = 'Enzo De Sena' #
 min_year = 2012
 
@@ -23,8 +23,11 @@ if use_proxy != 'no':
     elif use_proxy == 'luminati':
         if os.getenv("LUMINATI_USERNAME") is None or os.getenv("LUMINATI_PASSWORD") is None or os.getenv("LUMINATI_PORT") is None:
             raise SystemExit(f"{bcolors.FAIL}----> You set the proxy as 'luminati', but either LUMINATI_USERNAME, LUMINATI_PASSWORD or LUMINATI_PORT was not set in the .env file.{bcolors.ENDC}")
-            exit()
         pg.Luminati(usr=os.getenv("LUMINATI_USERNAME"),passwd=os.getenv("LUMINATI_PASSWORD"),proxy_port = os.getenv("LUMINATI_PORT"))
+    elif use_proxy == 'scraperapi':
+        if os.getenv("SCRAPERAPI_KEY") is None:
+            raise SystemExit(f"{bcolors.FAIL}----> You set the proxy as 'scraperapi', but SCRAPERAPI_KEY was not set in the .env file.{bcolors.ENDC}")
+        pg.ScraperAPI(os.getenv("SCRAPERAPI_KEY"))
     else:
         raise SystemExit(f"{bcolors.FAIL}----> The type of proxy was not recognised; the available options are 'no', 'free' or 'luminati'.{bcolors.ENDC}")
     scholarly.use_proxy(pg)
@@ -64,10 +67,7 @@ while True:
     else:
         print('----> You refused the entry above')
 
-
-
 my_scholar_documents = []
-
 for scholar_entry in author['publications']:
     scholar_entry_filled = scholarly.fill(scholar_entry)
     document = construct_document_from_scholar_entry(scholar_entry_filled)
@@ -93,30 +93,18 @@ for scholar_entry in author['publications']:
         if scopus_document.num_citations is not len(scopus_document.cited_by):
             print(f"{bcolors.WARNING}----> WARNING: the number listed on the documents CSV is not the same as the number of citing documents found in the SCOPUS citations CSV. This may be due to poor parsing of the citation CSV. Results likely to be inaccurate.{bcolors.ENDC}")
 
-
         print('----> Downloading Google Scholar citations of the paper... (if this hangs here, it may be due to a slow proxy or too many requests to Google Scholar; wait or connect from a different IP/proxy.)')
-
-        while True:
-            try:
-                scholar_citating_documents = scholarly.citedby(scholar_entry_filled)
-                for citation in scholar_citating_documents:
-                    scholar_citing_document = construct_document_from_scholar_entry(scholarly.fill(citation))
-                    scopus_citing_document = find_document_in_documents(scholar_citing_document, scopus_document.cited_by)
-                    if scopus_citing_document is not None:
-                        print(f"----> Citation found! See below the Google Scholar entry followed by the SCOPUS entry:")
-                        scholar_citing_document.print_data()
-                        scopus_citing_document.print_data()
-                    else:
-                        print(f"{bcolors.FAIL}----> The following citation does not appear to be recorded on SCOPUS:{bcolors.ENDC}")
-                        scholar_citing_document.print_data()
-                break
-            except Exception as e:
-                print(f"{bcolors.WARNING}----> Google Scholar refused request; trying a new proxy; I am restarting for the same article, so some entries may be repeated. {bcolors.WARNING}")
-                try:
-                    pg.get_next_proxy()
-                    scholarly.use_proxy(pg)
-                except Exception as e:
-                    raise SystemExit(f"{bcolors.FAIL}----> I ran out of proxies; giving up... :-( {bcolors.ENDC}")
+        scholar_citating_documents = scholarly.citedby(scholar_entry_filled)
+        for citation in scholar_citating_documents:
+            scholar_citing_document = construct_document_from_scholar_entry(scholarly.fill(citation))
+            scopus_citing_document = find_document_in_documents(scholar_citing_document, scopus_document.cited_by)
+            if scopus_citing_document is not None:
+                print(f"----> Citation found! See below the Google Scholar entry followed by the SCOPUS entry:")
+                scholar_citing_document.print_data()
+                scopus_citing_document.print_data()
+            else:
+                print(f"{bcolors.FAIL}----> The following citation does not appear to be recorded on SCOPUS:{bcolors.ENDC}")
+                scholar_citing_document.print_data()
     else:
         print(f"{bcolors.FAIL}----> It appears no SCOPUS entry is present for the paper above.{bcolors.ENDC}")
     print()
