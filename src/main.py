@@ -2,6 +2,7 @@ from comparator import *
 from scholarly import scholarly
 from scholarly import ProxyGenerator
 
+
 ##### ##### ##### ##### ##### ##### ##### MAIN
 
 scopus_documents_filename = 'data/documents.csv'
@@ -14,9 +15,9 @@ min_year = 2012
 my_scopus_documents = load_documents(scopus_documents_filename)
 scopus_citing_documents = load_documents(scopus_citing_documents_filename)
 
+pg = ProxyGenerator()
 
 if use_proxy != 'no':
-    pg = ProxyGenerator()
     if use_proxy == 'free':
         pg.FreeProxies()
     elif use_proxy == 'luminati':
@@ -92,18 +93,30 @@ for scholar_entry in author['publications']:
         if scopus_document.num_citations is not len(scopus_document.cited_by):
             print(f"{bcolors.WARNING}----> WARNING: the number listed on the documents CSV is not the same as the number of citing documents found in the SCOPUS citations CSV. This may be due to poor parsing of the citation CSV. Results likely to be inaccurate.{bcolors.ENDC}")
 
+
         print('----> Downloading Google Scholar citations of the paper... (if this hangs here, it may be due to a slow proxy or too many requests to Google Scholar; wait or connect from a different IP/proxy.)')
-        scholar_citating_documents = scholarly.citedby(scholar_entry_filled)
-        for citation in scholar_citating_documents:
-            scholar_citing_document = construct_document_from_scholar_entry(scholarly.fill(citation))
-            scopus_citing_document = find_document_in_documents(scholar_citing_document, scopus_document.cited_by)
-            if scopus_citing_document is not None:
-                print(f"----> Citation found! See below the Google Scholar entry followed by the SCOPUS entry:")
-                scholar_citing_document.print_data()
-                scopus_citing_document.print_data()
-            else:
-                print(f"{bcolors.FAIL}----> The following citation does not appear to be recorded on SCOPUS:{bcolors.ENDC}")
-                scholar_citing_document.print_data()
+
+        while True:
+            try:
+                scholar_citating_documents = scholarly.citedby(scholar_entry_filled)
+                for citation in scholar_citating_documents:
+                    scholar_citing_document = construct_document_from_scholar_entry(scholarly.fill(citation))
+                    scopus_citing_document = find_document_in_documents(scholar_citing_document, scopus_document.cited_by)
+                    if scopus_citing_document is not None:
+                        print(f"----> Citation found! See below the Google Scholar entry followed by the SCOPUS entry:")
+                        scholar_citing_document.print_data()
+                        scopus_citing_document.print_data()
+                    else:
+                        print(f"{bcolors.FAIL}----> The following citation does not appear to be recorded on SCOPUS:{bcolors.ENDC}")
+                        scholar_citing_document.print_data()
+                break
+            except Exception as e:
+                print(f"{bcolors.WARNING}----> Google Scholar refused request; trying a new proxy; I am restarting for the same article, so some entries may be repeated. {bcolors.WARNING}")
+                try:
+                    pg.get_next_proxy()
+                    scholarly.use_proxy(pg)
+                except Exception as e:
+                    raise SystemExit(f"{bcolors.FAIL}----> I ran out of proxies; giving up... :-( {bcolors.ENDC}")
     else:
         print(f"{bcolors.FAIL}----> It appears no SCOPUS entry is present for the paper above.{bcolors.ENDC}")
     print()
