@@ -62,6 +62,7 @@ Before you can use the tool, you need to download some information from Scopus.
    ```
 5. Run the python script:
    ```sh
+   cd scopus-checker
    python scopus-checker.py -d <document file> -c <citations file> -a '<your name and surname>' -p scraperapi -k <your own scraper api key>
    ```
 
