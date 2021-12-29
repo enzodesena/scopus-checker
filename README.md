@@ -92,7 +92,9 @@ Distributed under the MIT License. See `LICENSE` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Enzo De Sena - [desena.org](https://desena.org) [@enzoresearch](https://twitter.com/EnzoResearch) 
+Enzo De Sena:
+[desena.org](https://desena.org) 
+[@enzoresearch](https://twitter.com/EnzoResearch) 
 
 
 
@@ -100,4 +102,5 @@ Enzo De Sena - [desena.org](https://desena.org) [@enzoresearch](https://twitter.
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
 
-* This is heavily based on [scholarly](https://github.com/scholarly-python-package/scholarly).
+
+This script uses [scholarly](https://github.com/scholarly-python-package/scholarly).
