@@ -20,13 +20,15 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-All you need is love, and also `virtualenv` and `pip`. 
+All you need is love, and also `virtualenv` and `pip`. You also need a:
+- A scopus subscription (your University will probably have that?) 
+- And (optionally, but not so optionally), a ScraperAPI account; a free one is quite easy to set up and should do the job, unless I suppose if you have many thousands of citations;
 
 ### Installation
 
 1. Clone the repo
    ```sh
-   git clone https://github.com/github_username/repo_name.git
+   git clone git@github.com:enzodesena/scopus-checker.git
    ```
 2. Create python environment
    ```sh
@@ -48,7 +50,9 @@ All you need is love, and also `virtualenv` and `pip`.
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Before you can use the tool, you need to download some information from Scopus. I believe you need a 
+Before you can use the tool, you need to download some information from Scopus. You need a scopus subscription, but your University should probably have that. 
+
+1. Go to [https://www.scopus.com](scopus.com) and look up your own profile. The free search would not be enough for that. 
 
 
 
