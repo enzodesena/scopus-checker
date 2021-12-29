@@ -3,6 +3,18 @@ import re
 import traceback
 
 class Document:
+    def convert_to_int(self, value):
+        if isinstance(value, str) and len(value) > 0:
+            value_without_non_digits = re.sub("[^0-9]", "", value)
+            if len(value_without_non_digits) > 0:
+                return int(value_without_non_digits)
+            else:
+                return None
+        elif isinstance(value, int):
+            return value
+        else:
+            return None
+
     def __init__(self, authors, title, source_title, volume, issue, year, start_page, end_page, references_string, num_citations):
         self.authors = authors
         self.title = title
@@ -10,34 +22,13 @@ class Document:
         self.volume = volume
         self.issue = issue
 
-        if isinstance(year, str) and len(year) > 0:
-            year_without_non_digits = re.sub("[^0-9]", "", year)
-            if len(year_without_non_digits) > 0:
-                self.year = int(year_without_non_digits)
-            else:
-                self.year = None
-        elif isinstance(year, int):
-            self.year = year
-        else:
-            self.year = None
-
-        if isinstance(start_page, str) and len(start_page) > 0:
-            self.start_page = int(start_page)
-        else:
-            self.start_page = None
-
-        if isinstance(end_page, str) and len(end_page) > 0:
-            self.end_page = int(end_page)
-        else:
-            self.end_page = None
+        # integer fields
+        self.year = self.convert_to_int(year)
+        self.start_page = self.convert_to_int(start_page)
+        self.end_page = self.convert_to_int(end_page)
+        self.num_citations = self.convert_to_int(num_citations)
 
         self.references = []
-
-        if isinstance(num_citations, str) and len(num_citations) > 0:
-            self.num_citations = int(num_citations)
-        else:
-            self.num_citations = 0
-
         self.cited_by = []
 
         for referenced_document_string in references_string:
@@ -49,7 +40,6 @@ class Document:
                 print(traceback.format_exc())
                 exit()
 
-
     def print_data(self):
         print('Authors:\t '+self.authors)
         print('Title:\t\t '+self.title)
@@ -59,6 +49,7 @@ class Document:
         print('End page:\t '+str(self.end_page))
         print('Volume:\t\t '+self.volume)
         print('Issue:\t\t '+self.issue)
+        # print('Num citations:\t\t '+str(self.num_citations))
 
 
 def get_pages(reference_string):
@@ -167,15 +158,7 @@ def contruct_document_from_string(reference_string):
     [start_page, end_page] = get_pages(reference_string)
     [issue, volume] = get_issue_volume(reference_string)
 
-    document = Document(authors, title, source_title, volume, issue, year, start_page, end_page, '', '')
-
-    if False:
-        print('------')
-        print('|'+reference_string+'|')
-        document.print_data()
-        print('------')
-
-    return document
+    return Document(authors, title, source_title, volume, issue, year, start_page, end_page, '', '')
 
 
 def construct_document_from_scholar_entry(scholar_entry):
@@ -187,14 +170,16 @@ def construct_document_from_scholar_entry(scholar_entry):
         year = ''
 
     if 'pages' in bib_entry.keys() and len(bib_entry['pages']) > 0:
-        pages_attempt = bib_entry['pages'].split('-')
+        if '--' in bib_entry['pages']:
+            delimiter = '--'
+        else:
+            delimiter = '-'
+        pages_attempt = bib_entry['pages'].split(delimiter)
         start_page = pages_attempt[0]
         if len(pages_attempt) > 1:
-            end_page = bib_entry['pages'].split('-')[1]
+            end_page = pages_attempt[1]
         else:
             end_page = ''
-        start_page = re.sub("[^0-9]", "", start_page)
-        end_page = re.sub("[^0-9]", "", end_page)
     else:
         start_page = ''
         end_page = ''
@@ -203,6 +188,8 @@ def construct_document_from_scholar_entry(scholar_entry):
         source_title = bib_entry['journal']
     elif 'conference' in bib_entry.keys():
         source_title = bib_entry['conference']
+    elif 'booktitle' in bib_entry.keys():
+        source_title = bib_entry['booktitle']
     else:
         source_title = ''
 
@@ -216,6 +203,11 @@ def construct_document_from_scholar_entry(scholar_entry):
     else:
         issue = ''
 
+    if 'num_citations' in scholar_entry.keys():
+        num_citations = int(scholar_entry['num_citations'])
+    else:
+        num_citations = 0
+
     return Document(bib_entry['author'],
         bib_entry['title'],
         source_title,
@@ -225,4 +217,4 @@ def construct_document_from_scholar_entry(scholar_entry):
         start_page,
         end_page,
         '',
-        scholar_entry['num_citations'])
+        num_citations)

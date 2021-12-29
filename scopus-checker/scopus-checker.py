@@ -23,7 +23,7 @@ scopus_citing_documents_filename = ''
 use_proxy = 'no' # 'no' or 'free' or 'luminati' or 'scraperapi'
 author_name = ''
 min_year = 0
-select_first_author = True
+choose_author = False
 scraperapi_key = ''
 
 try:
@@ -46,7 +46,7 @@ for opt, arg in opts:
     elif opt in ("-k"):
         scraperapi_key = arg
     elif opt in ("-z"):
-        select_first_author = False
+        choose_author = True
     elif opt in ("-p"):
         use_proxy = arg
 
@@ -111,12 +111,12 @@ while True:
     if 'coauthors' in author_entry.keys():
         print('Num coauthors: \t'+str(len(author_entry['coauthors'])))
 
-    if not select_first_author:
+    if choose_author:
         print('Is this you? (y/n)')
         user_answer = input()
-
         if user_answer.lower() == 'y' or user_answer.lower() == 'yes':
             print('----> You accepted the entry above')
+            author = author_entry
             break
         else:
             print('----> You refused the entry above')
@@ -129,18 +129,18 @@ while True:
 my_scholar_documents = []
 for scholar_entry in author['publications']:
     scholar_entry_filled = scholarly.fill(scholar_entry)
-    document = construct_document_from_scholar_entry(scholar_entry_filled)
-    my_scholar_documents.append(document)
+    scholar_document = construct_document_from_scholar_entry(scholar_entry_filled)
+    my_scholar_documents.append(scholar_document)
 
     print('----> Handling the following Google Scholar document:')
-    document.print_data()
+    scholar_document.print_data()
 
-    if document.year < min_year:
+    if scholar_document.year is not None and scholar_document.year < min_year:
         print('----> Skipping because the document year is before ', min_year)
         continue
 
     print('----> Attempting to find corresponding SCOPUS entry...')
-    scopus_document = find_document_in_documents(document, my_scopus_documents)
+    scopus_document = find_document_in_documents(scholar_document, my_scopus_documents)
     if scopus_document is not None:
         print('----> Entry found! See below the SCOPUS entry details:')
         scopus_document.print_data()
@@ -151,6 +151,10 @@ for scholar_entry in author['publications']:
         print('Num citations found in SCOPUS citing documents CSV: ', len(scopus_document.cited_by))
         if scopus_document.num_citations is not len(scopus_document.cited_by):
             print(f"{bcolors.WARNING}----> WARNING: the number listed on the documents CSV is not the same as the number of citing documents found in the SCOPUS citations CSV. This may be due to poor parsing of the citation CSV. Results likely to be inaccurate.{bcolors.ENDC}")
+
+        if scholar_document.num_citations == 0:
+            print('----> No citations for this paper. ')
+            continue
 
         print('----> Downloading Google Scholar citations of the paper... (if this hangs here, it may be due to a slow proxy or too many requests to Google Scholar; wait or connect from a different IP/proxy.)')
         scholar_citating_documents = scholarly.citedby(scholar_entry_filled)
