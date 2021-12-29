@@ -44,7 +44,7 @@ You are going to need:
    ```sh
    pip install -r requirements.txt
    ```
-5. (Optional, but not so optional) Get a free API Scraper Key at [https://www.scraperapi.com](https://www.scraperapi.com) and copy/paste your scraper API key. 
+5. (Optional, but not so optional) Get a free API Scraper Key at [scraperapi.com](https://www.scraperapi.com) and copy/paste your scraper API key. 
 
 
 
@@ -53,9 +53,9 @@ You are going to need:
 
 Before you can use the tool, you need to download some information from Scopus. 
 
-1. Go to [https://www.scopus.com](scopus.com) and look up your own profile. The free search would not be enough for that. 
-2. Go to your own `Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and nothing else; click on `Export` and move the file to your repository directory; we will call this the 'document file'
-3. Go to `Cited by XXX Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and also **Include references**; click on `Export` and move the file to your repository directory; we will call this the 'citations file'
+1. Go to [scopus.com](https://www.scopus.com) and look up your own profile. The free search would not be enough for that. 
+2. Go to your own `Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and nothing else; click on `Export` and move the file to your repository directory; we will call this the 'document file'.
+3. Go to `Cited by XXX Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and also **Include references**; click on `Export` and move the file to your repository directory; we will call this the 'citations file'.
 4. Go into your repository directory and activate the virtual environment:
    ```sh
    source env/bin/activate
@@ -93,7 +93,7 @@ Distributed under the MIT License. See `LICENSE.txt` for more information.
 <!-- CONTACT -->
 ## Contact
 
-Enzo De Sena - [@enzoresearch](https://twitter.com/EnzoResearch) [desena.org](https://desena.org) 
+Enzo De Sena - [desena.org](https://desena.org) [@enzoresearch](https://twitter.com/EnzoResearch) 
 
 
 
