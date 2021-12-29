@@ -9,8 +9,6 @@ A python script to check which Google Scholar documents and citations are missin
 
 If you ever had to cross-check which papers and citations Scopus forgot to index, you would know--it is not fun. This script may provide a little help with that. 
 
-This tool assumes that all documents and citations on Google Scholar are a superset of the Scopus entries.
-
 **Please notice that this is a rather unreliable tool, and should only be used as a rough first screening. I take no responsibility for any missed citations or documents. See `LICENSE` for more information.**
 
 
