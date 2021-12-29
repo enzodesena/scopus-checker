@@ -62,7 +62,7 @@ Now you are ready to run the script. Go into your repository directory and run t
    python scopus-checker.py -d <document file> -c <citations file> -a '<your name and surname>' -p scraperapi -k <your own scraper api key>
    ```
 
-In this final step, notice how we used the `scraperapi` proxy option. Given how strict Google Scholar has become over the years, this is pretty much the only option that will make this script work. You can also run the script without proxies, but it is unlikely to work for very long (see [https://scholarly.readthedocs.io/en/stable/quickstart.html#using-proxies](scholarly proxies) for more information. 
+In this final step, notice how we used the `scraperapi` proxy option. Given how strict Google Scholar has become over the years, this is pretty much the only option that will make this script work. You can also run the script without proxies, but it is unlikely to work for very long (see [scholarly proxies](https://scholarly.readthedocs.io/en/stable/quickstart.html#using-proxies) for more information. 
 
 
 <!-- CONTRIBUTING -->
