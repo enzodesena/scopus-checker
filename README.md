@@ -51,16 +51,13 @@ You are going to need:
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Before you can use the tool, you need to download some information from Scopus. 
+Before you can use the tool, you need to download some information from Scopus:
 
 1. Go to [scopus.com](https://www.scopus.com) and look up your own profile. The free search would not be enough for that. 
 2. Go to your own `Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and nothing else; click on `Export` and move the file to your repository directory; we will call this the 'document file'.
 3. Go to `Cited by XXX Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and also **Include references**; click on `Export` and move the file to your repository directory; we will call this the 'citations file'.
-4. Go into your repository directory and activate the virtual environment:
-   ```sh
-   source env/bin/activate
-   ```
-5. Run the python script:
+
+Now you are ready to run the script. Go into your repository directory and run the python script (if you haven't done so already, activate the virtual environmnet with `source env/bin/activate`):
    ```sh
    cd scopus-checker
    python scopus-checker.py -d <document file> -c <citations file> -a '<your name and surname>' -p scraperapi -k <your own scraper api key>
