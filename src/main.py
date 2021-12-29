@@ -1,23 +1,78 @@
 from comparator import *
 from scholarly import scholarly
 from scholarly import ProxyGenerator
+import sys, getopt
 
+def usage():
+    print('A python script to check which (Google Scholar) citations are missing from Scopus.')
+    print('Minimal use:')
+    print(sys.argv[0]+' -d <scopusdocuments> -c <scopuscitations> -a <authorname>')
+    print()
+    print('Additional options:')
+    print("-p <proxy>\t\t add a proxy server; options: 'free', 'scrapterapi'; for instance:")
+    print("\t-p free\t\t this will use a set of free proxies will be used;'")
+    print("\t-p scraperapi\t this will use ScraperAPI as a proxy; in this case you need to add -k <yourscraperapikey>")
+    print('-m <minimumyear> \t only parse paper after (and including) a given year (e.g. 2012)')
+    print('-z \t\t\t if included, you will be able to choose which Google Scholar author profile to pick; if not, the first query will be chosen')
+    print()
+    print('This is a rather unreliable tool, and should only be used for a rough first screening. See the license for more information. ')
 
-##### ##### ##### ##### ##### ##### ##### MAIN
+scopus_documents_filename = ''
+scopus_citing_documents_filename = ''
 
-scopus_documents_filename = 'data/documents.csv'
-scopus_citing_documents_filename = 'data/citedby.csv'
-use_proxy = 'scraperapi' # 'free' or 'no'
-author_name = 'Enzo De Sena' #
-min_year = 2012
+use_proxy = 'no' # 'no' or 'free' or 'luminati' or 'scraperapi'
+author_name = ''
+min_year = 0
+select_first_author = True
+scraperapi_key = ''
 
+try:
+    opts, args = getopt.getopt(sys.argv[1:],"h:d:c:a:k:p:z:m:")
+except getopt.GetoptError:
+    usage()
+    sys.exit(2)
+for opt, arg in opts:
+    if opt == '-h':
+        usage()
+        sys.exit()
+    elif opt in ("-d"):
+        scopus_documents_filename = arg
+    elif opt in ("-c"):
+        scopus_citing_documents_filename = arg
+    elif opt in ("-a"):
+        author_name = arg
+    elif opt in ("-m"):
+        min_year = int(arg)
+    elif opt in ("-k"):
+        scraperapi_key = arg
+    elif opt in ("-z"):
+        select_first_author = False
+    elif opt in ("-p"):
+        use_proxy = arg
 
-my_scopus_documents = load_documents(scopus_documents_filename)
-scopus_citing_documents = load_documents(scopus_citing_documents_filename)
+if len(scopus_documents_filename) == 0:
+    raise SystemExit("The scopus document filename was not recognised. Call python "+sys.argv[0]+" -h for more information.")
 
-pg = ProxyGenerator()
+if len(scopus_citing_documents_filename) == 0:
+    raise SystemExit("The scopus citations filename was not recognised. Call python "+sys.argv[0]+" -h for more information.")
+
+if use_proxy == 'scraperapi' and len(scraperapi_key) == 0:
+    raise SystemExit("You requested scraper API as a proxy, but did not provide a key. Call python "+sys.argv[0]+" -h for more information.")
+
+# main.py -d 'data/documents.csv' -c 'data/citedby.csv' -a 'Enzo De Sena' -p scraperapi -sp ***REMOVED***
+
+try:
+    my_scopus_documents = load_documents(scopus_documents_filename)
+except FileNotFoundError:
+    raise SystemExit("The scopus document file was not found.")
+
+try:
+    scopus_citing_documents = load_documents(scopus_citing_documents_filename)
+except FileNotFoundError:
+    raise SystemExit("The scopus citations file was not found.")
 
 if use_proxy != 'no':
+    pg = ProxyGenerator()
     if use_proxy == 'free':
         pg.FreeProxies()
     elif use_proxy == 'luminati':
@@ -41,7 +96,6 @@ while True:
         author_entry = next(search_query)
     except:
         raise SystemExit(f"{bcolors.FAIL}----> There was no Google Scholar author entry corresponding to your query.{bcolors.ENDC}")
-        break
 
     author_entry = scholarly.fill(author_entry)
 
@@ -57,15 +111,20 @@ while True:
     if 'coauthors' in author_entry.keys():
         print('Num coauthors: \t'+str(len(author_entry['coauthors'])))
 
-    print('Is this you? (y/n)')
-    user_answer = input()
+    if not select_first_author:
+        print('Is this you? (y/n)')
+        user_answer = input()
 
-    if user_answer.lower() == 'y' or user_answer.lower() == 'yes':
-        print('----> You accepted the entry above')
+        if user_answer.lower() == 'y' or user_answer.lower() == 'yes':
+            print('----> You accepted the entry above')
+            break
+        else:
+            print('----> You refused the entry above')
+    else:
         author = author_entry
         break
-    else:
-        print('----> You refused the entry above')
+
+
 
 my_scholar_documents = []
 for scholar_entry in author['publications']:
@@ -103,7 +162,7 @@ for scholar_entry in author['publications']:
                 scholar_citing_document.print_data()
                 scopus_citing_document.print_data()
             else:
-                print(f"{bcolors.FAIL}----> The following citation does not appear to be recorded on SCOPUS:{bcolors.ENDC}")
+                print(f"{bcolors.FAIL}----> The following Google Scholar citation does not appear to be recorded on SCOPUS:{bcolors.ENDC}")
                 scholar_citing_document.print_data()
     else:
         print(f"{bcolors.FAIL}----> It appears no SCOPUS entry is present for the paper above.{bcolors.ENDC}")

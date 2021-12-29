@@ -9,26 +9,35 @@ class Document:
         self.source_title = source_title
         self.volume = volume
         self.issue = issue
+
         if isinstance(year, str) and len(year) > 0:
-            self.year = int(year)
+            year_without_non_digits = re.sub("[^0-9]", "", year)
+            if len(year_without_non_digits) > 0:
+                self.year = int(year_without_non_digits)
+            else:
+                self.year = None
         elif isinstance(year, int):
             self.year = year
         else:
             self.year = None
+
         if isinstance(start_page, str) and len(start_page) > 0:
             self.start_page = int(start_page)
         else:
             self.start_page = None
+
         if isinstance(end_page, str) and len(end_page) > 0:
             self.end_page = int(end_page)
         else:
             self.end_page = None
+
         self.references = []
 
         if isinstance(num_citations, str) and len(num_citations) > 0:
             self.num_citations = int(num_citations)
         else:
             self.num_citations = 0
+
         self.cited_by = []
 
         for referenced_document_string in references_string:
@@ -189,7 +198,6 @@ def construct_document_from_scholar_entry(scholar_entry):
     else:
         start_page = ''
         end_page = ''
-    # authors, title, source_title, volume, issue, year, start_page, end_page, references_string, num_citations):
 
     if 'journal' in bib_entry.keys():
         source_title = bib_entry['journal']
