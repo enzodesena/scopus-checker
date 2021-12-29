@@ -29,13 +29,13 @@ You are going to need:
 
 ### Installation
 
-1. Clone the repo
+1. Clone the repo and go into the directory
    ```sh
    git clone git@github.com:enzodesena/scopus-checker.git
+   cd scopus-checker
    ```
 2. Create python environment
    ```sh
-   cd scopus-checker
    virtualenv -p /usr/bin/python3 env
    ```
 3. Activate environment
