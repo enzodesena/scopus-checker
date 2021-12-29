@@ -40,16 +40,24 @@ class Document:
                 print(traceback.format_exc())
                 exit()
 
-    def print_data(self):
-        print('Authors:\t '+self.authors)
-        print('Title:\t\t '+self.title)
-        print('Year:\t\t '+str(self.year))
-        print('Source title:\t '+self.source_title)
-        print('Start page:\t '+str(self.start_page))
-        print('End page:\t '+str(self.end_page))
-        print('Volume:\t\t '+self.volume)
-        print('Issue:\t\t '+self.issue)
-        # print('Num citations:\t\t '+str(self.num_citations))
+    def get_data_output(self):
+        if self.start_page is None:
+            start_page = ''
+        else:
+            start_page = self.start_page
+        if self.end_page is None:
+            end_page = ''
+        else:
+            end_page = self.end_page
+        return  'Authors:\t ' + self.authors + '\n' + \
+                'Title:\t\t ' + self.title + '\n' + \
+                'Year:\t\t ' + str(self.year) + '\n' + \
+                'Source title:\t ' + self.source_title + '\n' + \
+                'Volume:\t\t ' + self.volume + '\n' + \
+                'Issue:\t\t ' + self.issue + '\n' + \
+                'Start page:\t ' + str(start_page) + '\n' + \
+                'End page:\t ' + str(end_page) + '\n' + \
+                'Num citations:\t ' + str(self.num_citations)
 
 
 def get_pages(reference_string):
