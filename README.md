@@ -1,6 +1,6 @@
 
 
-# Scopus Check
+# Scopus Checker
 A python script to check which Google Scholar documents and citations are missing from Scopus.
 
 
@@ -31,8 +31,8 @@ You are going to need:
 
 1. Clone the repo and go into the directory
    ```sh
-   git clone git@github.com:enzodesena/scopus-check.git
-   cd scopus-check
+   git clone git@github.com:enzodesena/scopus-checker.git
+   cd scopus-checker
    ```
 2. Create python environment and activate it
    ```sh
@@ -58,8 +58,8 @@ Before you can use the tool, you need to download some information from Scopus:
 
 Now you are ready to run the script. Go into your repository directory and run the python script (if you haven't done so already, activate the virtual environmnet with `source env/bin/activate`):
    ```sh
-   cd scopus-check
-   python scopus-check.py -d <document file> -c <citations file> -a '<your name and surname>' -p scraperapi -k <your own scraper api key>
+   cd scopus-checker
+   python scopus-checker.py -d <document file> -c <citations file> -a '<your name and surname>' -p scraperapi -k <your own scraper api key>
    ```
 
 In this final step, notice how we used the `scraperapi` proxy option. Given how strict Google Scholar has become over the years, this is pretty much the only option that will make this script work. You can also run the script without proxies, but it is unlikely to work for very long (see [scholarly proxies](https://scholarly.readthedocs.io/en/stable/quickstart.html#using-proxies) for more information. 
