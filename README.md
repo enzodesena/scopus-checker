@@ -42,7 +42,7 @@ You are going to need:
    ```
 4. Install pip packages
    ```sh
-   pip install -r requirements
+   pip install -r requirements.txt
    ```
 5. (Optional, but not so optional) Get a free API Scraper Key at [https://www.scraperapi.com](https://www.scraperapi.com) and copy/paste your scraper API key. 
 
