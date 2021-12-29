@@ -20,9 +20,10 @@ To get a local copy up and running follow these simple example steps.
 
 ### Prerequisites
 
-All you need is love, and also `virtualenv` and `pip`. You also need a:
-- A scopus subscription (your University will probably have that?) 
-- And (optionally, but not so optionally), a ScraperAPI account; a free one is quite easy to set up and should do the job, unless I suppose if you have many thousands of citations;
+You are going to need:
+- `pip` [https://pip.pypa.io/en/stable/installation/](https://pip.pypa.io/en/stable/installation/)
+- `virtualenv` [https://virtualenv.pypa.io/en/latest/installation.html](https://virtualenv.pypa.io/en/latest/installation.html)
+- a Scopus subscription (your University will probably provide that?) 
 
 ### Installation
 
@@ -41,20 +42,30 @@ All you need is love, and also `virtualenv` and `pip`. You also need a:
    ```
 4. Install pip packages
    ```sh
-   pip install -r requirements
+   pip install -r requirements.txt
    ```
-5. (Optional) Get a free API Scraper Key at [https://www.scraperapi.com](https://www.scraperapi.com)
+5. (Optional, but not so optional) Get a free API Scraper Key at [https://www.scraperapi.com](https://www.scraperapi.com) and copy/paste your scraper API key. 
 
 
 
 <!-- USAGE EXAMPLES -->
 ## Usage
 
-Before you can use the tool, you need to download some information from Scopus. You need a scopus subscription, but your University should probably have that. 
+Before you can use the tool, you need to download some information from Scopus. 
 
 1. Go to [https://www.scopus.com](scopus.com) and look up your own profile. The free search would not be enough for that. 
+2. Go to your own `Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and nothing else; click on `Export` and move the file to your repository directory; we will call this the 'document file'
+3. Go to `Cited by XXX Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and also **Include references**; click on `Export` and move the file to your repository directory; we will call this the 'citations file'
+4. Go into your repository directory and activate the virtual environment:
+   ```sh
+   source env/bin/activate
+   ```
+5. Run the python script:
+   ```sh
+   python scopus-checker.py -d <document file> -c <citations file> -a '<your name and surname>' -p scraperapi -k <your own scraper api key>
+   ```
 
-
+In step 5, notice how we used the `scraperapi` proxy option. Given how strict Google Scholar has become over the years, this is pretty much the only option that will make this script work. You can also run it without that option, but it is unlikely to work for very long (see [https://scholarly.readthedocs.io/en/stable/quickstart.html#using-proxies](scholarly proxies) for more information. 
 
 
 <!-- CONTRIBUTING -->
