@@ -11,7 +11,7 @@ If you ever had to cross-check which papers and citations Scopus forgot to index
 
 This tool assumes that all documents and citations on Google Scholar are a superset of the Scopus entries.
 
-**Please notice that this is a rather unreliable tool, and should only be used as a rough first screening. I take no responsibility for any missed citations or documents. See the license for more information.**
+**Please notice that this is a rather unreliable tool, and should only be used as a rough first screening. I take no responsibility for any missed citations or documents. See `LICENSE` for more information.**
 
 
 
@@ -86,7 +86,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the MIT License. See `LICENSE.txt` for more information.
+Distributed under the MIT License. See `LICENSE` for more information.
 
 
 <!-- CONTACT -->
