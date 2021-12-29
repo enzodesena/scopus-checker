@@ -34,19 +34,16 @@ You are going to need:
    git clone git@github.com:enzodesena/scopus-checker.git
    cd scopus-checker
    ```
-2. Create python environment
+2. Create python environment and activate it
    ```sh
    virtualenv -p /usr/bin/python3 env
-   ```
-3. Activate environment
-   ```sh
    source env/bin/activate
    ```
-4. Install pip packages
+3. Install pip packages
    ```sh
    pip install -r requirements.txt
    ```
-5. (Optional, but not so optional) Get a free API Scraper Key at [scraperapi.com](https://www.scraperapi.com) and copy/paste your scraper API key. 
+4. (Optional, but not so optional) Get a free API Scraper Key at [scraperapi.com](https://www.scraperapi.com) and copy/paste your scraper API key. 
 
 
 
@@ -56,7 +53,7 @@ You are going to need:
 Before you can use the tool, you need to download some information from Scopus:
 
 1. Go to [scopus.com](https://www.scopus.com) and look up your own profile. The free search would not be enough for that. 
-2. Go to your own `Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and nothing else; click on `Export` and move the file to your repository directory; we will call this the 'document file'.
+2. Go to `Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and nothing else; click on `Export` and move the file to your repository directory; we will call this the 'document file'.
 3. Go to `Cited by XXX Documents` -> `Export all`, select `CSV`, and toggle all options under `Citation information` and also **Include references**; click on `Export` and move the file to your repository directory; we will call this the 'citations file'.
 
 Now you are ready to run the script. Go into your repository directory and run the python script (if you haven't done so already, activate the virtual environmnet with `source env/bin/activate`):
