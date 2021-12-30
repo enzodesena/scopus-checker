@@ -3,7 +3,7 @@
 # Scopus Checker
 A python script to check which Google Scholar documents and citations are missing from Scopus.
 
-
+![example](docs/example.png)
 
 ## About The Project
 
