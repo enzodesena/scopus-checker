@@ -1,7 +1,7 @@
 
 
 # Scopus Checker
-A python script to check which Google Scholar documents and citations are missing from Scopus.
+A python script to check which (Google Scholar) papers and citations are missing from Scopus.
 
 
 ## About The Project
