@@ -35,7 +35,7 @@ def load_documents(csv_filename):
                 row['Year'],
                 start_page,
                 end_page,
-                row['References'].split('; '),
+                row['References'].split('; ') if 'References' in row else [],
                 num_citations)
             my_documents.append(document)
     return my_documents
