@@ -25,7 +25,7 @@ def print_to_console_and_file(file_stream, line):
     if output_stream is not None:
         output_stream.write(line + '\n')
 
-def get_author(author_name)
+def get_author(author_name):
     search_query = scholarly.search_author(author_name)
     while True:
         try:
